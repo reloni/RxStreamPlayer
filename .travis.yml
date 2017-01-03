@@ -1,0 +1,31 @@
+language: objective-c
+osx_image: xcode8.2
+xcode_project: RxStreamPlayer.xcodeproj
+
+env:
+  global:
+  #- WORKSPACE=
+  - PROJECT=RxStreamPlayer.xcodeproj
+  - FRAMEWORK_SCHEME=RxStreamPlayer
+  - SDK=iphonesimulator10.2
+  - DESTINATION_PLATFORM='platform=iOS Simulator,name=iPhone 6s,OS=10.1'
+
+before_install:
+  - SIMULATOR_ID=$(xcrun instruments -s | grep -o "iPhone 6s (10.1) \[.*\]" | grep -o "\[.*\]" | sed "s/^\[\(.*\)\]$/\1/")
+
+before_script:
+- carthage version
+- carthage update --platform iOS
+
+# build other frameworks with carthage
+#- carthage update OHHTTPStubs --platform iOS
+#- carthage update RxHttpClient --platform iOS --configuration Debug
+#- carthage update realm-cocoa --platform iOS
+
+script:
+- open -a "simulator" --args -CurrentDeviceUDID $SIMULATOR_ID
+#- set -o pipefail && xcodebuild -scheme "$FRAMEWORK_SCHEME" -project "$PROJECT" -sdk "$SDK" -configuration Debug ONLY_ACTIVE_ARCH=YES -destination "$DESTINATION_PLATFORM" GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES clean build  | xcpretty -c
+- set -o pipefail && xcodebuild -scheme "$FRAMEWORK_SCHEME" -project "$PROJECT" -sdk "$SDK" -configuration Debug ONLY_ACTIVE_ARCH=YES -destination "$DESTINATION_PLATFORM" -enableCodeCoverage YES GCC_INSTRUMENT_PROGRAM_FLOW_ARCS=YES GCC_GENERATE_TEST_COVERAGE_FILES=YES clean test  | xcpretty -c
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -J '^RxStreamPlayer$'

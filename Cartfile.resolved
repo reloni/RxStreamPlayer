@@ -1,0 +1,4 @@
+github "AliSoftware/OHHTTPStubs" "5.2.3"
+github "RxSwiftCommunity/RxHttpClient" "0.8.0"
+github "ReactiveX/RxSwift" "3.1.0"
+github "realm/realm-cocoa" "v2.1.2"
